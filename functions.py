@@ -8,7 +8,7 @@ from sklearn.preprocessing import Normalizer
 def extract_face(path, detector=MTCNN(), required_size=(160,160), save_faces=True):
   # load image from file
   image = Image.open(path)
-
+  
   # convert to rgb
   image = image.convert('RGB')
 
@@ -81,3 +81,18 @@ def predict_using_distance(faces_embeddings, labels, face_to_predict_embeddings)
       min_label = matching[i][1]
     
   return min_label
+
+def detect_faces(cascade, test_image, scaleFactor = 1.1):
+    # create a copy of the image to prevent any changes to the original one.
+    image_copy = test_image.copy()
+
+    #convert the test image to gray scale as opencv face detector expects gray images
+    gray_image = cv2.cvtColor(image_copy, cv2.COLOR_BGR2GRAY)
+    # Applying the haar classifier to detect faces
+    faces_rect = cascade.detectMultiScale(gray_image, scaleFactor=scaleFactor, minNeighbors=5)
+    faces_list = []
+    for (x, y, w, h) in faces_rect:
+        img = test_image[y:y+h, x:x+w]
+        img = cv2.resize(img, (160, 160))
+        faces_list.append(np.asarray(img).astype('float32'))
+    return faces_list
